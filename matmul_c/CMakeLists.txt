@@ -4,7 +4,7 @@ project(MATMUL)
 
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
-set(CMAKE_C_FLAGS "-O2 -march=native -mno-avx512f -fopenmp")
+set(CMAKE_C_FLAGS "-O2 -mavx -mavx2 -mfma -march=native -mno-avx512f -fopenmp")
 
 add_executable(benchmark benchmark.c)
 add_subdirectory(src)

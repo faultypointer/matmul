@@ -9,21 +9,21 @@ if __name__ == "__main__":
     except KeyError:
         blas_lib = "NumPy"
 
-    benchmark_data = glob.glob("*.txt")
+    benchmark_data = glob.glob("*/benchmark_*.txt")
     assert (
-        "benchmark_c.txt" in benchmark_data or "benchmark_numpy.txt" in benchmark_data
+        "matmul_c/benchmark_c.txt" in benchmark_data or "matmul_py/benchmark_numpy.txt" in benchmark_data
     ), "First, run benchmark.c and/or benchmark_numpy.py to create data"
 
     plt.rc("font", size=12)
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    if "benchmark_c.txt" in benchmark_data:
-        mat_sizes, min_gflops_c, max_gflops_c, avg_gflops_c = np.loadtxt("benchmark_c.txt").T
+    if "matmul_c/benchmark_c.txt" in benchmark_data:
+        mat_sizes, min_gflops_c, max_gflops_c, avg_gflops_c = np.loadtxt("matmul_c/benchmark_c.txt").T
         plt.plot(mat_sizes, avg_gflops_c, "-*", label="matmul.c MEAN")
         plt.plot(mat_sizes, max_gflops_c, "-*", label="matmul.c PEAK")
 
-    if "benchmark_numpy.txt" in benchmark_data:
-        mat_sizes, min_gflops_numpy, max_gflops_numpy, avg_gflops_numpy = np.loadtxt("benchmark_numpy.txt").T
+    if "matmul_py/benchmark_numpy.txt" in benchmark_data:
+        mat_sizes, min_gflops_numpy, max_gflops_numpy, avg_gflops_numpy = np.loadtxt("matmul_py/benchmark_numpy.txt").T
         plt.plot(mat_sizes, avg_gflops_numpy, "-*", label="NumPy MEAN")
         plt.plot(mat_sizes, max_gflops_numpy, "-*", label="NumPy PEAK")
 
