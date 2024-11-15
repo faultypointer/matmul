@@ -34,6 +34,8 @@
             python311Packages.numpy
             python311Packages.matplotlib
             python311Packages.tqdm
+
+            cargo
           ];
 
           # Set any environment variables for your dev shell
