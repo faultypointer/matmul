@@ -1,2 +1,2 @@
+pub mod kernel;
 pub mod naive;
-// pub mod kernel;

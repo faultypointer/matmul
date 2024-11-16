@@ -4,6 +4,7 @@ mod vers;
 use mat::Mat;
 use std::env;
 use std::io::Write;
+use vers::kernel;
 use vers::naive;
 
 fn main() {
@@ -67,7 +68,7 @@ fn main() {
         let n_iter = 200000 / mat_size as u128;
         for _ in 0..n_iter {
             let start = std::time::Instant::now();
-            naive::matmul(&a, &b, &mut c);
+            kernel::matmul(&a, &b, &mut c);
             let elapsed = start.elapsed().as_secs_f64();
             max_exec_time = max_exec_time.max(elapsed);
             min_exec_time = min_exec_time.min(elapsed);
@@ -96,13 +97,13 @@ fn main() {
 #[test]
 fn test_naive() {
     for _ in 0..100 {
-        let a = Mat::random(1000, 1000);
-        let b = Mat::random(1000, 1000);
-        let mut c = Mat::constant(1000, 1000, 0.0);
+        let a = Mat::random(1200, 1200);
+        let b = Mat::random(1200, 1200);
+        let mut c = Mat::constant(1200, 1200, 0.0);
 
-        let flops = 2.0 * (1000.0_f64).powf(3.0);
+        let flops = 2.0 * (1200.0_f64).powf(3.0);
         let start = std::time::Instant::now();
-        naive::matmul(&a, &b, &mut c);
+        kernel::matmul(&a, &b, &mut c);
         let elapsed = start.elapsed().as_secs_f64();
         println!("Exec. time: {}ms", elapsed * 1000.0);
         println!("GFLOPS = {}\n\n", flops / elapsed / 1e9);
