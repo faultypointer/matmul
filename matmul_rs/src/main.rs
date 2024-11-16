@@ -1,9 +1,10 @@
+mod mat;
 mod vers;
 
-use rand::Fill;
-use vers::naive;
+use mat::Mat;
 use std::env;
 use std::io::Write;
+use vers::naive;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -16,7 +17,7 @@ fn main() {
             args[1].parse::<usize>().expect("Error parsing MINSIZE"),
             args[2].parse::<usize>().expect("Error parsing MAXSIZE"),
             args[3].parse::<usize>().expect("Error parsing NPTS"),
-            args[4].parse::<usize>().expect("Error parsing WARMUP")
+            args[4].parse::<usize>().expect("Error parsing WARMUP"),
         )
     };
     println!("======================");
@@ -25,26 +26,26 @@ fn main() {
     println!("NPTS = {n_pts}");
     println!("WARMUP = {warmup}");
     println!("======================");
-    let mut avg_gflops =  vec![0.0; n_pts];
+    let mut avg_gflops = vec![0.0; n_pts];
     let mut min_gflops = vec![0.0; n_pts];
     let mut max_gflops = vec![0.0; n_pts];
     let mut global_max_gflops: f64 = 0.0;
     let mut mat_sizes = vec![0; n_pts];
-    
+
     let delta_size = (max_size - min_size) / (n_pts - 1);
-    for i in 0..(n_pts -1)  {
+    for i in 0..(n_pts - 1) {
         mat_sizes[i] = min_size + i * delta_size;
     }
-    mat_sizes[n_pts-1] = max_size;
+    mat_sizes[n_pts - 1] = max_size;
 
     // warmup
     {
         println!("Warm-up");
-        let a = vec_rand(max_size, max_size);
-        let b = vec_rand(max_size, max_size);
-        let mut c = vec_const(max_size, max_size, 0.0);
+        let a = Mat::random(max_size, max_size);
+        let b = Mat::random(max_size, max_size);
+        let mut c = Mat::constant(max_size, max_size, 0.0);
         for i in 0..warmup {
-            print!("\r{} / {warmup}", i+1);
+            print!("\r{} / {warmup}", i + 1);
             std::io::stdout().flush().unwrap();
             naive::matmul(&a, &b, &mut c);
         }
@@ -52,13 +53,13 @@ fn main() {
 
     println!("\nBenchmark: ");
     for i in 0..n_pts {
-        print!("\r {} / {n_pts}", i+1);
+        print!("\r {} / {n_pts}", i + 1);
         std::io::stdout().flush().unwrap();
         let mat_size = mat_sizes[i];
-        let a = vec_rand(mat_size, mat_size);
-        let b = vec_rand(mat_size, mat_size);
-        let mut c = vec_const(mat_size, mat_size, 0.0);
-        
+        let a = Mat::random(mat_size, mat_size);
+        let b = Mat::random(mat_size, mat_size);
+        let mut c = Mat::constant(mat_size, mat_size, 0.0);
+
         let flop: f64 = 2.0 * mat_size.pow(3) as f64;
         let mut avg_exec_time: f64 = 0.0;
         let mut max_exec_time: f64 = 0.0;
@@ -82,46 +83,28 @@ fn main() {
     println!("\n=========================");
     let mut bench_string = String::with_capacity(n_pts * 100);
     for i in 0..n_pts {
-        bench_string.push_str(
-            &format!(
-                "{} {} {} {}\n", 
-                mat_sizes[i], 
-                min_gflops[i], 
-                max_gflops[i], 
-                avg_gflops[i])
-            );
+        bench_string.push_str(&format!(
+            "{} {} {} {}\n",
+            mat_sizes[i], min_gflops[i], max_gflops[i], avg_gflops[i]
+        ));
     }
     std::fs::write("benchmark_rust.txt", bench_string).unwrap();
     println!("PEAK GFLOPS = {global_max_gflops}");
     println!("Benchmark result were saved in benchmark_rust.txt");
 }
 
-fn vec_rand(m: usize, n: usize) -> Vec<Vec<f32>> {
-    let mut mat = Vec::with_capacity(m);
-    let mut rng = rand::thread_rng();
-    for i in 0..m {
-        mat.push(vec![0.0; n]);
-        mat[i].try_fill(&mut rng).unwrap();
-    }
-    mat
-}
-
-fn vec_const(m: usize, n: usize, val: f32) -> Vec<Vec<f32>> {
-    vec![vec![val; n]; m]
-}
-
 #[test]
 fn test_naive() {
-    for _ in 0..50 {
-        let a = vec_rand(1000, 1000);
-        let b = vec_rand(1000, 1000);
-        let mut c = vec_const(1000, 1000, 0.0);
+    for _ in 0..100 {
+        let a = Mat::random(1000, 1000);
+        let b = Mat::random(1000, 1000);
+        let mut c = Mat::constant(1000, 1000, 0.0);
 
         let flops = 2.0 * (1000.0_f64).powf(3.0);
         let start = std::time::Instant::now();
         naive::matmul(&a, &b, &mut c);
         let elapsed = start.elapsed().as_secs_f64();
         println!("Exec. time: {}ms", elapsed * 1000.0);
-        println!("GFLOPS = {}", flops / elapsed / 1e9);
+        println!("GFLOPS = {}\n\n", flops / elapsed / 1e9);
     }
 }
