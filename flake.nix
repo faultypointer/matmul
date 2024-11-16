@@ -36,6 +36,11 @@
             python311Packages.tqdm
 
             cargo
+            rustfmt
+            cargo-watch
+            cargo-edit
+            cargo-deny
+            rustc
           ];
 
           # Set any environment variables for your dev shell
