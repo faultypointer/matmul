@@ -10,7 +10,7 @@
 
 #define MR 16
 #define NR 6
-#define NTHREADS 8
+#define NTHREADS 16
 
 #define MC MR* NTHREADS * 1
 #define NC NR* NTHREADS * 80
